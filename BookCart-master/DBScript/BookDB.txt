@@ -1,0 +1,105 @@
+Scaffold-DbContext "Your connection string" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Tables Categories, UserType, UserMaster, Book, Cart, CartItems, CustomerOrders, CustomerOrderDetails, Wishlist, WishlistItems -force
+
+---------------------------------------------------------------------------------------
+
+-- Create Categories table first as it's referenced by Book table
+CREATE TABLE Categories (  
+CategoryID int AUTO_INCREMENT PRIMARY KEY,  
+CategoryName varchar(20) NOT NULL   
+);
+
+INSERT INTO Categories (CategoryName) VALUES('Biography');  
+INSERT INTO Categories (CategoryName) VALUES('Fiction');  
+INSERT INTO Categories (CategoryName) VALUES('Mystery');  
+INSERT INTO Categories (CategoryName) VALUES('Fantasy');  
+INSERT INTO Categories (CategoryName) VALUES('Romance'); 
+
+-- Create UserType table
+CREATE TABLE UserType (  
+UserTypeID int AUTO_INCREMENT PRIMARY KEY,  
+UserTypeName varchar(20) NOT NULL   
+);
+
+INSERT INTO UserType (UserTypeName) VALUES('Admin');  
+INSERT INTO UserType (UserTypeName) VALUES('User'); 
+
+-- Create UserMaster table
+CREATE TABLE UserMaster(  
+UserID int AUTO_INCREMENT PRIMARY KEY,  
+FirstName varchar(20) NOT NULL,
+LastName varchar(20) NOT NULL,
+Username varchar(20) NOT NULL,
+Password varchar(40) NOT NULL,
+Gender varchar(6) NOT NULL,
+UserTypeID int NOT NULL,
+FOREIGN KEY (UserTypeID) REFERENCES UserType(UserTypeID)
+);
+
+INSERT INTO UserMaster (FirstName, LastName, Username, Password, Gender, UserTypeID) 
+VALUES('Ankit','Sharma','adminuser','qwerty','Male',1);
+
+-- Create Book table
+CREATE TABLE Book(
+BookID int AUTO_INCREMENT PRIMARY KEY,  
+Title varchar(100) NOT NULL,  
+Author varchar(100) NOT NULL,  
+Category varchar(20) NOT NULL,  
+Price decimal(10, 2) NOT NULL,
+CoverFileName varchar(100) NULL
+);
+
+-- Create Cart table
+CREATE TABLE Cart(
+CartId varchar(36) PRIMARY KEY,
+UserID int NOT NULL,
+DateCreated datetime NOT NULL,
+FOREIGN KEY (UserID) REFERENCES UserMaster(UserID)
+);
+
+-- Create CartItems table
+CREATE TABLE CartItems(
+CartItemId int AUTO_INCREMENT PRIMARY KEY,
+CartId varchar(36) NOT NULL,
+ProductId int NOT NULL,
+Quantity int NOT NULL,
+FOREIGN KEY (CartId) REFERENCES Cart(CartId),
+FOREIGN KEY (ProductId) REFERENCES Book(BookID)
+);
+
+-- Create CustomerOrders table
+CREATE TABLE CustomerOrders(
+OrderId varchar(20) PRIMARY KEY,
+UserID int NOT NULL,
+DateCreated datetime NOT NULL,
+CartTotal Decimal(10,2) NOT NULL,
+FOREIGN KEY (UserID) REFERENCES UserMaster(UserID)
+);
+
+-- Create CustomerOrderDetails table
+CREATE TABLE CustomerOrderDetails(
+OrderDetailsId int AUTO_INCREMENT PRIMARY KEY,
+OrderId varchar(20) NOT NULL,
+ProductId int NOT NULL,
+Quantity int NOT NULL,
+Price decimal(10,2) NOT NULL,
+FOREIGN KEY (OrderId) REFERENCES CustomerOrders(OrderId),
+FOREIGN KEY (ProductId) REFERENCES Book(BookID)
+);
+
+-- Create Wishlist table
+CREATE TABLE Wishlist(
+WishlistId varchar(36) PRIMARY KEY,
+UserID int NOT NULL,
+DateCreated datetime NOT NULL,
+FOREIGN KEY (UserID) REFERENCES UserMaster(UserID)
+);
+
+-- Create WishlistItems table
+CREATE TABLE WishlistItems(
+WishlistItemId int AUTO_INCREMENT PRIMARY KEY,
+WishlistId varchar(36) NOT NULL,
+ProductId int NOT NULL,
+FOREIGN KEY (WishlistId) REFERENCES Wishlist(WishlistId),
+FOREIGN KEY (ProductId) REFERENCES Book(BookID)
+);
+
